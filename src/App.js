@@ -228,7 +228,7 @@ function calculateWinner(squares, callBackWhenWin)
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
     {
-      callBackWhenWin(a, b, c);
+      //callBackWhenWin(a, b, c);
       return squares[a];
     }
   }
