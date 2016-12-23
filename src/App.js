@@ -4,7 +4,8 @@ import './App.css';
 
 
 //Square组件接受标签名为onClick和value的消息，onClick值是函数，使用方法是<Square onClick= {func} />
-function Square(props){
+function Square(props)
+{
   //因为class是react的保留字，只能用"className"替代元素的"class"属性
   return (<button className="square" onClick={props.onClick}>
     {
@@ -61,7 +62,7 @@ class Board extends React.Component {
    */
   renderSquare(i)
   {
-    return <Square value={this.state.squares[i]} onClick={() => this.handleClick(i)}/>;
+    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)}/>;
   }
 
   render()
@@ -95,6 +96,8 @@ class Board extends React.Component {
     </div>
   }
 }
+
+
 class Game extends React.Component {
   constructor()
   {
@@ -107,20 +110,56 @@ class Game extends React.Component {
 
   render()
   {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = calculateWinner(current.squares);
+
+    let status;
+    if (winner)
+    {
+      status = 'Winner: ' + winner;
+    } else
+    {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Board
+            squares={current.squares}
+            onClick={(i) => this.handleClick(i)}
+          />
         </div>
         <div className="game-info">
-          <div>{}</div>
-          <ol>{}</ol>
+          <div>{status}</div>
+          <ol>{/* TODO */}</ol>
         </div>
       </div>
     );
   }
+
+  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({
+      history: history.concat([{
+        squares: squares
+      }]),
+      xIsNext: !this.state.xIsNext,
+    });
+  }
 }
 
+/**
+ * calculateWinner函数不属于任何元素，只是一个helper method
+ * @param squares
+ * @returns {*}
+ */
 function calculateWinner(squares)
 {
   const lines = [
