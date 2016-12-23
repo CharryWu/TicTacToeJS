@@ -1,23 +1,17 @@
 //使用ES6的语法
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-//Square组件接受标签名为onClick和value的消息，onClick值是函数，使用方法是<Square onClick= {func} />
-class Square extends React.Component {
-  constructor()
-  {
-    super();
-  }
 
-  render()
-  {
-    //因为class是react的保留字，只能用"className"替代元素的"class"属性
-    return (<button className="square" onClick={this.props.onClick}>
+//Square组件接受标签名为onClick和value的消息，onClick值是函数，使用方法是<Square onClick= {func} />
+function Square(props){
+  //因为class是react的保留字，只能用"className"替代元素的"class"属性
+  return (<button className="square" onClick={props.onClick}>
+    {
       //value的值为'X'或'O'
-      {this.props.value}
-    </button>);
-  }
+      props.value
+    }
+  </button>);
 }
 
 class Board extends React.Component {
