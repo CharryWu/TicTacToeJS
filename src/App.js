@@ -7,7 +7,7 @@ import './App.css';
 function Square(props)
 {
   //因为class是react的保留字，只能用"className"替代元素的"class"属性
-  return (<button className="square" onClick={props.onClick}>
+  return (<button className={props.isHighlight?'square':'square square-highlight'} onClick={props.onClick}>
     {
       //value的值为'X'或'O'
       props.value
@@ -25,7 +25,21 @@ class Board extends React.Component {
    */
   renderSquare(i)
   {
-    return <Square value={this.props.squares[i]} key={"sq-" + i} onClick={() => this.props.onClick(i)}/>;
+    return <Square isHighlight={(() =>
+    {
+      var arr = this.props.winSqIndexArr;
+      if (arr)
+      {
+        for (var j = 0; i < arr.length; j++)
+        {
+          if (arr[j] == i)
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    })()} value={this.props.squares[i]} key={"sq-" + i} onClick={() => this.props.onClick(i)}/>;
   }
 
   //both render and createRowContent都是从数组里面创建JSX元素。
@@ -98,7 +112,7 @@ class Game extends React.Component {
     //的下标。
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares, this.highLightWinningSquare);
+    const winner = calculateWinner(current.squares, this.highLightWinningSquare.bind(this));
     var moves;
     //在每次渲染的时候创建一个新的moves数组，保存着开局以来所有的操作。moves数组里面是JSX元素，所以能直接将moves元素append到game-info里面
     //迭代history数组，根据history中的每个元素step(下标值为move)创建JSX元素，将所有元素保存到一个moves数组里面
@@ -145,6 +159,7 @@ class Game extends React.Component {
           <Board
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
+            winSqIndexArr={this.state.winningSquares}
           />
         </div>
         <div className="game-info">
