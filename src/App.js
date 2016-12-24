@@ -7,7 +7,7 @@ import './App.css';
 function Square(props)
 {
   //因为class是react的保留字，只能用"className"替代元素的"class"属性
-  return (<button className="square" onClick={props.onClick}>
+  return (<button className={props.win?'square square-highlight':'square'} onClick={props.onClick}>
     {
       //value的值为'X'或'O'
       props.value
@@ -25,7 +25,19 @@ class Board extends React.Component {
    */
   renderSquare(i)
   {
+    if (this.props.winSqs)
+    {
+      var winArr = this.props.winSqs;
+      for (var j = 0; j < winArr.length; j++)
+      {
+        if (winArr[j] == i)
+        {
+          return <Square value={this.props.squares[i]} key={"sq-" + i} onClick={() => this.props.onClick(i)} win={true}/>;
+        }
+      }
+    }
     return <Square value={this.props.squares[i]} key={"sq-" + i} onClick={() => this.props.onClick(i)}/>;
+
   }
 
   //both render and createRowContent都是从数组里面创建JSX元素。
@@ -88,7 +100,7 @@ class Game extends React.Component {
       history: [{squares: Array(9).fill(null)}],
       xIsNext: true,
       ascendOrder: true,
-      stepNumber: 0,
+      stepNumber: 0
     };
   }
 
@@ -98,7 +110,7 @@ class Game extends React.Component {
     //的下标。
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares, this.highLightWinningSquare);
+    const winnerObj = this.calculateWinner(current.squares);
     var moves;
     //在每次渲染的时候创建一个新的moves数组，保存着开局以来所有的操作。moves数组里面是JSX元素，所以能直接将moves元素append到game-info里面
     //迭代history数组，根据history中的每个元素step(下标值为move)创建JSX元素，将所有元素保存到一个moves数组里面
@@ -132,9 +144,9 @@ class Game extends React.Component {
     }
 
     let status;
-    if (winner)
+    if (winnerObj)
     {
-      status = 'Winner: ' + winner;
+      status = 'Winner: ' + winnerObj.winner;
     } else
     {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
@@ -145,6 +157,7 @@ class Game extends React.Component {
           <Board
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
+            winSqs={winnerObj ? winnerObj.winSquares : null}
           />
         </div>
         <div className="game-info">
@@ -185,8 +198,8 @@ class Game extends React.Component {
     const current = history[history.length - 1];
     const squares = current.squares.slice();
 
-    //如果squareCp的赢家不为null，说明已经有一方赢了；如果squareCp[i]不为null，说明这个方形已经被填充满了，就不需要继续执行
-    if (calculateWinner(squares) || squares[i]) return;
+    //如果this.state.winningSquares的赢家不为null，说明已经有一方赢了；如果squareCp[i]不为null，说明这个方形已经被填充满了，就不需要继续执行
+    if (this.calculateWinner(squares) || squares[i]) return;
 
     //修改xIsNext flag变量
     squares[i] = this.state.xIsNext ? 'X' : 'O';
@@ -200,39 +213,36 @@ class Game extends React.Component {
     });
   }
 
-  highLightWinningSquare(index1, index2, index3)
+  /**
+   * 计算
+   * @param squares
+   * @returns winnerObj 包括胜利者的名字(X或O)及其成功的一线
+   */
+  calculateWinner(squares)
   {
-    this.setState({winningSquares: [index1, index2, index3]});
-  }
-}
-
-/**
- * calculateWinner函数不属于任何元素，只是一个helper method
- * @param squares
- * @returns {*}
- */
-function calculateWinner(squares, callBackWhenWin)
-{
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++)
-  {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++)
     {
-      //callBackWhenWin(a, b, c);
-      return squares[a];
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
+      {
+        return {
+          winner: squares[a],
+          winSquares: [a, b, c]
+        };
+      }
     }
+    return null;
   }
-  return null;
 }
 
 export default Game;

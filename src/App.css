@@ -40,7 +40,9 @@ ol, ul {
 .square:focus {
     outline: none;
 }
-
+.square-highlight{
+    background:yellow;
+}
 .kbd-navigation .square:focus {
     background: #ddd;
 }
